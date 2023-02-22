@@ -17,7 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.webage.domain.Customer;
 import com.webage.domain.CustomerFactory;
 import com.webage.domain.Token;
+import com.webage.domain.TokenRequestData;
+import com.webage.util.Authenticator;
 import com.webage.util.JWTHelper;
+import com.webage.util.JWTUtil;
 
 @RestController
 @RequestMapping("/token")
@@ -25,10 +28,33 @@ public class TokenAPI {
 
 	//private static Key key = AuthFilter.key;	
 	public static Token appUserToken;
-	
+
+	static JWTUtil jwtUtil = new JWTHelper();
+
 	@GetMapping
 	public String getAll() {
 		return "jwt-fake-token-asdfasdfasfa".toString();
+	}
+	
+	
+	@PostMapping(consumes = "application/json")
+	public ResponseEntity<?> getToken(@RequestBody TokenRequestData tokenRequestData) {
+		
+		String username = tokenRequestData.getUsername();
+		String password = tokenRequestData.getPassword();
+		String scopes = tokenRequestData.getScopes();
+		System.out.println(tokenRequestData);
+		
+		if (username != null && username.length() > 0 
+				&& password != null && password.length() > 0 
+				&& checkPassword(username, password)) {
+			Token token = jwtUtil.createToken(scopes);
+			ResponseEntity<?> response = ResponseEntity.ok(token);
+			return response;			
+		}
+		// bad request
+		return (ResponseEntity<?>) ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		
 	}
 	
 	@PostMapping
@@ -89,7 +115,7 @@ public class TokenAPI {
     	if( username.equalsIgnoreCase("ApiClientApp")) {
     		scopes = "com.webage.auth.apis";
     	}
-    	String token_string = JWTHelper.createToken(scopes);
+    	return jwtUtil.createToken(scopes);
     	
 		/*
 		 * long fiveHoursInMillis = 1000 * 60 *60 * 5;
@@ -100,7 +126,7 @@ public class TokenAPI {
 		 * .compact();
 		 */
     	
-    	return new Token(token_string);
+//    	return new Token(token_string);
     }
     
     
@@ -113,7 +139,6 @@ public class TokenAPI {
 			conn.setRequestProperty("Accept", "application/json");
 			Token token = getAppUserToken();
 			conn.setRequestProperty("authorization", "Bearer " + token.getToken());
-
 			if (conn.getResponseCode() != 200) {
 				return null;
 			} else {
