@@ -29,6 +29,8 @@ public class TokenAPI {
 	public static Token appUserToken;
 
 	static JWTUtil jwtUtil = new JWTHelper();
+	private String api_scope = "com.webage.data.apis";
+
 
 	@GetMapping
 	public String getAll() {
@@ -42,11 +44,11 @@ public class TokenAPI {
 
 		String username = customer.getName();
 		String password = customer.getPassword();
-		
+
 		if (username != null && username.length() > 0 
 				&& password != null && password.length() > 0 
 				&& checkPassword(username, password)) {
-			Token token = jwtUtil.createToken(username);
+			Token token = jwtUtil.createToken(api_scope);
 			ResponseEntity<?> response = ResponseEntity.ok(token);
 			return response;			
 		}
@@ -132,6 +134,7 @@ public class TokenAPI {
 		try {
 
 			URL url = new URL("http://localhost:8080/api/customers/byname/" + username);
+			System.out.println(url);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 			conn.setRequestProperty("Accept", "application/json");
