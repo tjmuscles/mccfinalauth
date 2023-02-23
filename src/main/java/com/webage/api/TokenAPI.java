@@ -18,7 +18,6 @@ import com.webage.domain.Customer;
 import com.webage.domain.CustomerFactory;
 import com.webage.domain.Token;
 import com.webage.domain.TokenRequestData;
-import com.webage.util.Authenticator;
 import com.webage.util.JWTHelper;
 import com.webage.util.JWTUtil;
 
@@ -38,17 +37,16 @@ public class TokenAPI {
 	
 	
 	@PostMapping(consumes = "application/json")
-	public ResponseEntity<?> getToken(@RequestBody TokenRequestData tokenRequestData) {
+	public ResponseEntity<?> getToken(@RequestBody Customer customer) {
 		
-		String username = tokenRequestData.getUsername();
-		String password = tokenRequestData.getPassword();
-		String scopes = tokenRequestData.getScopes();
-		System.out.println(tokenRequestData);
+
+		String username = customer.getName();
+		String password = customer.getPassword();
 		
 		if (username != null && username.length() > 0 
 				&& password != null && password.length() > 0 
 				&& checkPassword(username, password)) {
-			Token token = jwtUtil.createToken(scopes);
+			Token token = jwtUtil.createToken(username);
 			ResponseEntity<?> response = ResponseEntity.ok(token);
 			return response;			
 		}
