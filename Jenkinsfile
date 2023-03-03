@@ -1,5 +1,5 @@
 node {
-    stage('Checkout') {
+    stage('Checkout ') {
         git url: 'https://github.com/tjmuscles/day6Auth.git'
     }
     
