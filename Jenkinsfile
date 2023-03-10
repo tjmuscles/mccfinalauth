@@ -14,7 +14,6 @@ node {
 	stage ("Containerize the app-docker build - AuthApi") {
         sh 'docker build --rm -t mcc-auth:v1.0 .'
         sh 'minikube image load mcc-auth:v1.0'
-        
     }
     
     stage ("Inspect the docker image - AuthApi"){
@@ -38,6 +37,7 @@ node {
 	      		sh "kubectl create deployment mcc-auth --image=mcc-auth:v1.0"
   		        sh "kubectl set env deployment/mcc-auth API_HOST=\$(kubectl get service/mcc-data -o jsonpath='{.spec.clusterIP}'):8080"
 	      		sh "kubectl expose deployment mcc-auth --type=LoadBalancer --port=8081"
+			}
 		}
 	}
 }
