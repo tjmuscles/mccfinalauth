@@ -1,6 +1,6 @@
 node {
     stage('Checkout ') {
-        git url: 'https://github.com/tjmuscles/day6Auth.git'
+        git url: 'https://github.com/tjmuscles/mccfinalauth.git'
     }
     
     stage('Gradle build') {
@@ -13,6 +13,8 @@ node {
 	
 	stage ("Containerize the app-docker build - AuthApi") {
         sh 'docker build --rm -t mcc-auth:v1.0 .'
+        sh 'minikube image load mcc-auth:v1.0'
+        
     }
     
     stage ("Inspect the docker image - AuthApi"){
@@ -31,10 +33,11 @@ node {
     	description: '', name: 'Pass')]
     	
     	if(response=="Yes") {
-		    stage('Release - AuthService') {
-		      sh 'docker stop mcc-auth'
-		      sh 'echo MCC AuthService is ready to release!'
-		    }
+		    stage('Deploy to K8S') {
+			   	sh "docker stop mcc-auth"
+	      		sh "kubectl create deployment mcc-auth --image=mcc-auth:v1.0"
+  		        sh "kubectl set env deployment/mcc-auth API_HOST=\$(kubectl get service/mcc-data -o jsonpath='{.spec.clusterIP}'):8080"
+	      		sh "kubectl expose deployment mcc-auth --type=LoadBalancer --port=8081"
 		}
 	}
 }
